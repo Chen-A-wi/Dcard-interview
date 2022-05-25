@@ -24,9 +24,12 @@ class SearchFragment : BaseFragment() {
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        observeLiveData()
+    }
 
+    private fun observeLiveData(){
         vm.apply {
             onClickEvent.observe(viewLifecycleOwner) { id ->
                 when (id) {
@@ -36,11 +39,5 @@ class SearchFragment : BaseFragment() {
                 }
             }
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-
     }
 }
