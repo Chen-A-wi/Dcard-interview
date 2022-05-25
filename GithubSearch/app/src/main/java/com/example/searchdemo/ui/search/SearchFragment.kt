@@ -1,17 +1,46 @@
 package com.example.searchdemo.ui.search
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.searchdemo.R
+import com.example.searchdemo.databinding.FragmentSearchBinding
+import com.example.searchdemo.ui.base.BaseFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SearchFragment : Fragment() {
+class SearchFragment : BaseFragment() {
+    private lateinit var binding: FragmentSearchBinding
+    private val vm by viewModel<SearchViewModel>()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_search, container, false)
+    ): View {
+        binding = FragmentSearchBinding.inflate(inflater, container, false).apply {
+            vm = this@SearchFragment.vm
+            lifecycleOwner = this@SearchFragment
+        }
+        return binding.root
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        vm.apply {
+            onClickEvent.observe(viewLifecycleOwner) { id ->
+                when (id) {
+                    R.id.button -> {
+                        searchRepositories()
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+
     }
 }
