@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.searchdemo.R
 import com.example.searchdemo.databinding.FragmentSearchBinding
 import com.example.searchdemo.ui.base.BaseFragment
 import com.example.searchdemo.ui.search.repositorieslist.RepositoriesListAdapter
@@ -40,14 +39,9 @@ class SearchFragment : BaseFragment() {
 
     private fun observeLiveData() {
         vm.apply {
-            notifyEvent.observe(viewLifecycleOwner) {
-                binding.rcvRepositoriesList.adapter?.notifyDataSetChanged()
+            notifyEvent.observe(viewLifecycleOwner) { dataList ->
+                binding.rcvRepositoriesList.adapter?.notifyItemInserted(dataList.size)
             }
-
-//            onClickEvent.observe(viewLifecycleOwner) { id ->
-//                when (id) {
-//                }
-//            }
         }
     }
 }

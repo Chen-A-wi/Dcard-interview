@@ -290,30 +290,3 @@ fun Int.formatHM(formatString: String): String {
 
     return String.format(formatString, h.toString(), m.toString())
 }
-
-/**
- * 跨日計算，DayOfMonth的差距，並非差距時間24小時的跨日
- */
-fun LocalDateTime.getCrossDays(compareDateTime: LocalDateTime): Int {
-    return Period.between(this.toLocalDate(), compareDateTime.toLocalDate()).days
-}
-
-/**
- * 跨日計算
- * @see getCrossDays
- * @return "+1","","-1"...etc more
- */
-fun LocalDateTime.getCrossDaysWithText(compareDateTime: LocalDateTime): String {
-    val crossDays = getCrossDays(compareDateTime)
-    return when {
-        crossDays > 0 -> {
-            "+$crossDays"
-        }
-        crossDays < 0 -> {
-            "-${abs(crossDays)}"
-        }
-        else -> {
-            ""
-        }
-    }
-}
