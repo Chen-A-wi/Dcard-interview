@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.example.searchdemo.R
 import com.example.searchdemo.databinding.FragmentSearchBinding
 import com.example.searchdemo.ui.base.BaseFragment
+import com.example.searchdemo.ui.search.repositorieslist.RepositoriesListAdapter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : BaseFragment() {
@@ -26,18 +27,27 @@ class SearchFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initView()
         observeLiveData()
     }
 
-    private fun observeLiveData(){
+    private fun initView() {
         vm.apply {
-            onClickEvent.observe(viewLifecycleOwner) { id ->
-                when (id) {
-                    R.id.button -> {
-                        searchRepositories()
-                    }
-                }
+            binding.rcvRepositoriesList.adapter =
+                RepositoriesListAdapter(itemsList = repositoriesList)
+        }
+    }
+
+    private fun observeLiveData() {
+        vm.apply {
+            notifyEvent.observe(viewLifecycleOwner) {
+                binding.rcvRepositoriesList.adapter?.notifyDataSetChanged()
             }
+
+//            onClickEvent.observe(viewLifecycleOwner) { id ->
+//                when (id) {
+//                }
+//            }
         }
     }
 }

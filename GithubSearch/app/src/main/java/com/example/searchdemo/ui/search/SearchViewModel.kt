@@ -4,6 +4,8 @@ import android.view.View
 import androidx.lifecycle.viewModelScope
 import com.example.searchdemo.common.utils.SchedulerProvider
 import com.example.searchdemo.common.utils.SingleLiveEvent
+import com.example.searchdemo.data.Item
+import com.example.searchdemo.data.Repositories
 import com.example.searchdemo.data.repository.SearchRepository
 import com.example.searchdemo.ui.base.BaseViewModel
 import com.orhanobut.logger.Logger
@@ -15,19 +17,29 @@ class SearchViewModel(
     private val repository: SearchRepository,
     private val scheduler: SchedulerProvider
 ) : BaseViewModel() {
-    val onClickEvent = SingleLiveEvent<Int>()
+    private val onClickEvent = SingleLiveEvent<Int>()
+    var repositoriesList = arrayListOf<Item>()
+    val notifyEvent by lazy { SingleLiveEvent<Unit> ()}
+
+    init {
+        searchRepositories("android", 1)
+    }
 
     fun onClick(v: View) = onClickEvent.postValue(v.id)
 
-    fun searchRepositories() {
+    fun searchRepositories(keyword: String, page: Int) {
         viewModelScope.launch {
-            repository.getRepositories("android", 1)
+            repository.getRepositories(keyword = keyword, page = page)
                 .flowOn(scheduler.io())
                 .catch { e ->
                     Logger.d(e)
                 }
                 .collect { result ->
-                    Logger.d(result.items)
+                    result.items?.let { item ->
+                        repositoriesList.addAll(item)
+                    }
+                    notifyEvent.postValue(Unit)
+                    Logger.d(repositoriesList)
                 }
         }
     }
