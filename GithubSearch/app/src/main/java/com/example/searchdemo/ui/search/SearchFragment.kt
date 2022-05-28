@@ -1,12 +1,19 @@
 package com.example.searchdemo.ui.search
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import com.example.searchdemo.R
 import com.example.searchdemo.databinding.FragmentSearchBinding
 import com.example.searchdemo.ui.base.BaseFragment
+import com.example.searchdemo.ui.search.repositorieslist.RepositoriesListAdapter
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : BaseFragment() {
@@ -26,15 +33,39 @@ class SearchFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initView()
         observeLiveData()
     }
 
-    private fun observeLiveData(){
+    private fun initView() {
         vm.apply {
-            onClickEvent.observe(viewLifecycleOwner) { id ->
+            binding.rcvRepositoriesList.adapter =
+                RepositoriesListAdapter(itemsList = repositoriesList)
+            lifecycleScope.launch {
+                binding.etSearch.onTextChangedFlow()
+                    .flowOn(scheduler.io())
+                    .conflate()
+                    .collectLatest { word ->
+                        Log.d("","============== $word")
+                        searchRepositories(keyword = word.toString(), page = 1, restState = true)
+                    }
+            }
+        }
+    }
+
+    private fun observeLiveData() {
+        vm.apply {
+            notifyEvent.observe(viewLifecycleOwner) { range ->
+                binding.rcvRepositoriesList.adapter?.notifyItemRangeChanged(
+                    range.StartPage,
+                    range.EndPage
+                )
+            }
+
+            clickLiveEvent.observe(viewLifecycleOwner) { id ->
                 when (id) {
-                    R.id.button -> {
-                        searchRepositories()
+                    R.id.imgBtnCancel -> {
+                        edtSearch.value = ""
                     }
                 }
             }
