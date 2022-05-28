@@ -11,5 +11,5 @@ interface SearchServices {
     suspend fun getRepositories(
         @Query("q") keyword: String,
         @Query("page") page: Int,
-    ): Repositories
+    ): Response<Repositories>
 }
