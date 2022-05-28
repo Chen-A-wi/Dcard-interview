@@ -34,6 +34,9 @@ android {
     dataBinding {
         enabled = true
     }
+    lintOptions {
+        disable 'CheckResult'
+    }
 }
 
 dependencies {
@@ -49,6 +52,7 @@ dependencies {
     //region UI
     implementation 'com.airbnb.android:lottie:5.1.1'
     implementation 'com.google.android.material:material:1.6.0'
+    implementation 'com.afollestad.material-dialogs:core:3.3.0'
     //endregion
 
     //region Network
@@ -70,6 +74,7 @@ dependencies {
     implementation "io.insert-koin:koin-android-compat:${versions.koin}"
     implementation "io.insert-koin:koin-androidx-workmanager:${versions.koin}"
     implementation "io.insert-koin:koin-androidx-navigation:${versions.koin}"
+    implementation "com.jakewharton.rxbinding2:rxbinding:2.2.0"
     //endregion
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

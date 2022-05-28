@@ -1,17 +1,20 @@
 package com.example.searchdemo.ui.search
 
 import android.text.Editable
-import android.util.Log
 import android.view.View
 import android.widget.EditText
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.searchdemo.R
 import com.example.searchdemo.common.ext.default
+import com.example.searchdemo.common.ext.safeLet
 import com.example.searchdemo.common.utils.SchedulerProvider
 import com.example.searchdemo.common.utils.SimplyTextWatcher
 import com.example.searchdemo.common.utils.SingleLiveEvent
+import com.example.searchdemo.data.ErrorMessage
 import com.example.searchdemo.data.Item
 import com.example.searchdemo.data.NotifyRange
 import com.example.searchdemo.data.repository.SearchRepository
@@ -19,10 +22,10 @@ import com.example.searchdemo.ui.base.BaseViewModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+
 
 class SearchViewModel(
     private val repository: SearchRepository,
@@ -36,6 +39,7 @@ class SearchViewModel(
     val errorText = MutableLiveData(R.string.empty)
     val isShowError = MutableLiveData<Boolean>()
     val isShowClear = MediatorLiveData<Boolean>()
+    val isUpdateList = MutableLiveData(false)
 
     fun onClick(v: View) {
         clickLiveEvent.postValue(v.id)
@@ -46,33 +50,36 @@ class SearchViewModel(
         viewModelScope.launch {
             repository.getRepositories(keyword = keyword, page = page)
                 .flowOn(scheduler.io())
-                .catch { e ->
-                    //TODO: Jump Error Dialog
-                    Log.e("API Error",e.message.orEmpty())
-                    isLoading.postValue(false)
-                }
-                .collectLatest { result ->
-                    if (restState) {
-                        resetPage()
-                    }
+                .collectLatest { response ->
+                    if (response.isSuccessful){
+                        val result = response.body()
 
-                    result.items?.let { item ->
-                        repositoriesList.addAll(item)
-                    }
+                        if (restState) {
+                            resetPage()
+                        }
 
-                    notifyEvent.postValue(
-                        NotifyRange(
-                            StartPage = repositoriesList.size - (result.items?.size ?: 0),
-                            EndPage = repositoriesList.size
+                        result?.items?.let { item ->
+                            repositoriesList.addAll(item)
+                        }
+
+                        notifyEvent.postValue(
+                            NotifyRange(
+                                StartPage = repositoriesList.size - (result?.items?.size ?: 0),
+                                EndPage = repositoriesList.size
+                            )
                         )
-                    )
+                    }else{
+                        errorEvent.postValue(ErrorMessage(errorCode = response.code()))
+                    }
                     isLoading.postValue(false)
+                    isUpdateList.postValue(false)
                 }
         }
     }
 
     private fun resetPage() {
         repositoriesList.clear()
+        isUpdateList.postValue(false)
         currentPage.postValue(1)
     }
 
@@ -98,6 +105,23 @@ class SearchViewModel(
         } else {
             isShowError.postValue(word.length > 256)
             errorText.postValue(R.string.enter_over_warning)
+        }
+    }
+
+    fun onScrollListener() = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            val manager = recyclerView.layoutManager as LinearLayoutManager
+            val focusPosition = manager.findLastCompletelyVisibleItemPosition()
+
+            if (isUpdateList.value != true && focusPosition == repositoriesList.lastIndex) {
+                safeLet(edtSearch.value, currentPage.value) { word, page ->
+                    searchRepositories(keyword = word, page = page + 1, restState = false)
+                    isUpdateList.postValue(true)
+                    currentPage.postValue(page + 1)
+                }
+            }
         }
     }
 }
