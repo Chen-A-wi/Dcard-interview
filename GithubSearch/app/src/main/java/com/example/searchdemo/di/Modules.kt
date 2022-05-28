@@ -34,6 +34,8 @@ val repositoryModule = module {
 
 val diModules = listOf(viewModelModule, networkModule, schedulerModule, repositoryModule)
 
+//TODO: Need to do mockWebServer
+
 fun createOkHttpClient(): OkHttpClient {
     return OkHttpClient.Builder()
         .retryOnConnectionFailure(true)

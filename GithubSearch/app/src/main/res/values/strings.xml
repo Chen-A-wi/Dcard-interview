@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">SearchDemo</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="edt_search_hint">Search Repositories</string>
+    <string name="enter_over_warning">Can\'t enter over 256 characters.</string>
+    <string name="enter_empty_warning">Can\'t consists solely of whitespace characters.</string>
+    <string name="empty" />
 </resources>
