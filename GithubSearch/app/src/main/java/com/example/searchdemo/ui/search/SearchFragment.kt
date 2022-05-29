@@ -44,8 +44,12 @@ class SearchFragment : BaseFragment() {
                 binding.etSearch.onTextChangedFlow()
                     .flowOn(scheduler.io())
                     .collectLatest { word ->
-                        if (word.isNotBlank()){
-                            searchRepositories(keyword = word.toString(), page = 1, restState = true)
+                        if (word.isNotBlank()) {
+                            searchRepositories(
+                                keyword = word.toString(),
+                                page = 1,
+                                restState = true
+                            )
                         }
                     }
             }
@@ -56,15 +60,11 @@ class SearchFragment : BaseFragment() {
 
     private fun observeLiveData() {
         vm.apply {
-            notifyEvent.observe(viewLifecycleOwner) { range ->
-                binding.rcvRepositoriesList.adapter?.notifyItemRangeChanged(
-                    range.StartPage,
-                    range.EndPage
-                )
+            notifyEvent.observe(viewLifecycleOwner) {
+                binding.rcvRepositoriesList.adapter?.notifyDataSetChanged()
             }
 
             clickLiveEvent.observe(viewLifecycleOwner) { id ->
-                binding.root.apply(::hideKeyboard)
                 when (id) {
                     R.id.imgBtnCancel -> {
                         edtSearch.value = ""

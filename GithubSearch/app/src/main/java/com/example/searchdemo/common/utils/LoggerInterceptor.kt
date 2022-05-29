@@ -1,7 +1,6 @@
 package com.example.searchdemo.common.utils
 
 import android.util.Log
-import com.orhanobut.logger.Logger
 import okhttp3.Interceptor
 import okhttp3.Response
 
