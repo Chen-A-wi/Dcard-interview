@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import com.example.searchdemo.R
 import com.example.searchdemo.common.ext.default
 import com.example.searchdemo.common.ext.safeLet
@@ -40,6 +41,7 @@ class SearchViewModel(
     val isShowError = MutableLiveData<Boolean>()
     val isShowClear = MediatorLiveData<Boolean>()
     val isUpdateList = MutableLiveData(false)
+    val isFocus = MutableLiveData(false)
 
     fun onClick(v: View) {
         clickLiveEvent.postValue(v.id)
@@ -51,7 +53,7 @@ class SearchViewModel(
             repository.getRepositories(keyword = keyword, page = page)
                 .flowOn(scheduler.io())
                 .collectLatest { response ->
-                    if (response.isSuccessful){
+                    if (response.isSuccessful) {
                         val result = response.body()
 
                         if (restState) {
@@ -68,7 +70,8 @@ class SearchViewModel(
                                 EndPage = repositoriesList.size
                             )
                         )
-                    }else{
+                    } else {
+                        isFocus.postValue(false)
                         errorEvent.postValue(ErrorMessage(errorCode = response.code()))
                     }
                     isLoading.postValue(false)
@@ -109,19 +112,30 @@ class SearchViewModel(
     }
 
     fun onScrollListener() = object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
 
-            val manager = recyclerView.layoutManager as LinearLayoutManager
-            val focusPosition = manager.findLastCompletelyVisibleItemPosition()
+            val position = (recyclerView.layoutManager as LinearLayoutManager)
+                .findLastCompletelyVisibleItemPosition()
 
-            if (isUpdateList.value != true && focusPosition == repositoriesList.lastIndex) {
-                safeLet(edtSearch.value, currentPage.value) { word, page ->
-                    searchRepositories(keyword = word, page = page + 1, restState = false)
-                    isUpdateList.postValue(true)
-                    currentPage.postValue(page + 1)
+            if (newState == SCROLL_STATE_IDLE && position > -1) {
+
+                isFocus.postValue(false)
+
+                if (isUpdateList.value != true && position == repositoriesList.lastIndex) {
+                    safeLet(edtSearch.value, currentPage.value) { word, page ->
+                        searchRepositories(keyword = word, page = page + 1, restState = false)
+                        isUpdateList.postValue(true)
+                        currentPage.postValue(page + 1)
+                    }
                 }
             }
+        }
+    }
+
+    fun getOnFocusChangeListener(): View.OnFocusChangeListener {
+        return View.OnFocusChangeListener { _, hasFocus ->
+            isFocus.value = hasFocus
         }
     }
 }

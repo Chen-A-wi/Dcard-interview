@@ -44,7 +44,9 @@ class SearchFragment : BaseFragment() {
                 binding.etSearch.onTextChangedFlow()
                     .flowOn(scheduler.io())
                     .collectLatest { word ->
-                        searchRepositories(keyword = word.toString(), page = 1, restState = true)
+                        if (word.isNotBlank()){
+                            searchRepositories(keyword = word.toString(), page = 1, restState = true)
+                        }
                     }
             }
 
@@ -67,6 +69,13 @@ class SearchFragment : BaseFragment() {
                     R.id.imgBtnCancel -> {
                         edtSearch.value = ""
                     }
+                }
+            }
+
+            isFocus.observe(viewLifecycleOwner) { state ->
+                if (!state) {
+                    binding.etSearch.clearFocus()
+                    hideKeyboard(binding.root)
                 }
             }
 
