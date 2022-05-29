@@ -1,11 +1,10 @@
 package com.example.searchdemo.common.ext
 
 import com.example.searchdemo.common.DateTimeFormatPattern
-import org.threeten.bp.*
+import org.threeten.bp.LocalDate
+import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
-import java.sql.Timestamp
 import java.util.*
-import kotlin.math.abs
 
 val String.localDateTimeFromISO: LocalDateTime
     get() = LocalDateTime.parse(this, DateTimeFormatter.ISO_DATE_TIME)
