@@ -30,11 +30,18 @@ class SearchFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (!vm.checkInternet(act)) {
+        if (!checkInternet()) {
             showPleaseInternetDialog()
         }
         initView()
         observeLiveData()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!checkInternet()) {
+            showPleaseInternetDialog()
+        }
     }
 
     private fun initView() {
@@ -78,7 +85,7 @@ class SearchFragment : BaseFragment() {
             cancelable(true)
             message(text = context.getString(R.string.alert_check_internet_msg))
         }.positiveButton(res = R.string.btn_confirm) {
-            if (!vm.checkInternet(act)) {
+            if (!checkInternet()) {
                 closeApp()
             }
         }.negativeButton(res = R.string.btn_cancel) {
