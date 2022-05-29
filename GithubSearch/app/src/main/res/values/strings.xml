@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">SearchDemo</string>
     <string name="edt_search_hint">Search Repositories</string>
+    <string name="alert_api_error">API Error</string>
+    <string name="lb_api_error_304">Not modified</string>
+    <string name="lb_api_error_403">Forbidden</string>
+    <string name="lb_api_error_404">Resource not found</string>
+    <string name="lb_api_error_422">Validation failed</string>
+    <string name="lb_api_error_503">Service unavailable</string>
+    <string name="lb_api_unknown_error">Unknown error</string>
+    <string name="btn_confirm">Confirm</string>
     <string name="enter_over_warning">Can\'t enter over 256 characters.</string>
     <string name="enter_empty_warning">Can\'t consists solely of whitespace characters.</string>
     <string name="empty" />

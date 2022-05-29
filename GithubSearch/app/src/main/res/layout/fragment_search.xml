@@ -70,6 +70,7 @@
                             android:maxLines="1"
                             android:paddingStart="0dp"
                             android:paddingEnd="30dp"
+                            app:onFocusChange="@{vm.getOnFocusChangeListener()}"
                             android:text="@={vm.edtSearch}"
                             android:textSize="16sp"
                             app:layout_constraintBottom_toBottomOf="parent"

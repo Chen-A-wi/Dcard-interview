@@ -24,15 +24,23 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
     dataBinding {
         enabled = true
+    }
+
+    lintOptions {
+        disable 'CheckResult'
+        disable 'NotifyDataSetChanged'
     }
 }
 
@@ -49,6 +57,7 @@ dependencies {
     //region UI
     implementation 'com.airbnb.android:lottie:5.1.1'
     implementation 'com.google.android.material:material:1.6.0'
+    implementation 'com.afollestad.material-dialogs:core:3.3.0'
     //endregion
 
     //region Network
@@ -64,7 +73,6 @@ dependencies {
     //endregion
 
     //region Utils
-    implementation('com.orhanobut:logger:2.2.0')
     implementation 'com.jakewharton.threetenabp:threetenabp:1.4.0'
     implementation "io.insert-koin:koin-android:${versions.koin}"
     implementation "io.insert-koin:koin-android-compat:${versions.koin}"

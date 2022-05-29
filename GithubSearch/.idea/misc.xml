@@ -10,7 +10,7 @@
         <entry key="app/src/main/res/drawable/ic_star_48px.xml" value="0.297" />
         <entry key="app/src/main/res/drawable/search-48px.xml" value="0.297" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.5651041666666666" />
-        <entry key="app/src/main/res/layout/fragment_search.xml" value="0.44894651539708263" />
+        <entry key="app/src/main/res/layout/fragment_search.xml" value="0.4" />
         <entry key="app/src/main/res/layout/include_appbar.xml" value="0.24909420289855072" />
         <entry key="app/src/main/res/layout/include_loading_view.xml" value="0.281661600810537" />
         <entry key="app/src/main/res/layout/item_repository.xml" value="0.5" />

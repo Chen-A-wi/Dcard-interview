@@ -1,12 +1,13 @@
 package com.example.searchdemo.common
 
-import android.widget.ImageView
+import android.view.View
+import android.widget.EditText
 import androidx.databinding.BindingAdapter
 
 object BindingAdapter {
     @JvmStatic
-    @BindingAdapter("android:src")
-    fun setImageSrc(imageView: ImageView, resId: Int) {
-        imageView.setImageResource(resId)
+    @BindingAdapter("onFocusChange")
+    fun onFocusChange(edit: EditText, listener: View.OnFocusChangeListener) {
+        edit.onFocusChangeListener = listener
     }
 }

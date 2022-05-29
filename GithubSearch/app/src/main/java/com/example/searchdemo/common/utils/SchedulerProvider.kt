@@ -1,7 +1,6 @@
 package com.example.searchdemo.common.utils
 
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.MainCoroutineDispatcher
 
 /**
  * Coroutine Scheduler Provider
