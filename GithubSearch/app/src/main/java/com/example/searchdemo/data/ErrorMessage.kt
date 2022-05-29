@@ -7,7 +7,7 @@ data class ErrorMessage(
     val errorCode:Int,
 ) {
     fun message(context: Context): String {
-        return context.getString(ErrorType.fromCode(errorCode).resString)
+        return "(${errorCode}) ${context.getString(ErrorType.fromCode(errorCode).resString)}"
     }
 }
 

@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import com.example.searchdemo.R
 import com.example.searchdemo.common.ext.default
@@ -17,7 +18,6 @@ import com.example.searchdemo.common.utils.SimplyTextWatcher
 import com.example.searchdemo.common.utils.SingleLiveEvent
 import com.example.searchdemo.data.ErrorMessage
 import com.example.searchdemo.data.Item
-import com.example.searchdemo.data.NotifyRange
 import com.example.searchdemo.data.repository.SearchRepository
 import com.example.searchdemo.ui.base.BaseViewModel
 import kotlinx.coroutines.channels.awaitClose
@@ -33,14 +33,13 @@ class SearchViewModel(
     val scheduler: SchedulerProvider
 ) : BaseViewModel() {
     var repositoriesList = arrayListOf<Item>()
-    val notifyEvent by lazy { MutableLiveData<NotifyRange>() }
+    val notifyEvent by lazy { MutableLiveData<Unit>() }
     val clickLiveEvent by lazy { SingleLiveEvent<Int>() }
     private val currentPage by lazy { MediatorLiveData<Int>().default(1) }
     val edtSearch by lazy { MediatorLiveData<String>().default("") }
     val errorText = MutableLiveData(R.string.empty)
     val isShowError = MutableLiveData<Boolean>()
     val isShowClear = MediatorLiveData<Boolean>()
-    val isUpdateList = MutableLiveData(false)
     val isFocus = MutableLiveData(false)
 
     fun onClick(v: View) {
@@ -64,25 +63,18 @@ class SearchViewModel(
                             repositoriesList.addAll(item)
                         }
 
-                        notifyEvent.postValue(
-                            NotifyRange(
-                                StartPage = repositoriesList.size - (result?.items?.size ?: 0),
-                                EndPage = repositoriesList.size
-                            )
-                        )
+                        notifyEvent.postValue(Unit)
                     } else {
                         isFocus.postValue(false)
                         errorEvent.postValue(ErrorMessage(errorCode = response.code()))
                     }
                     isLoading.postValue(false)
-                    isUpdateList.postValue(false)
                 }
         }
     }
 
     private fun resetPage() {
         repositoriesList.clear()
-        isUpdateList.postValue(false)
         currentPage.postValue(1)
     }
 
@@ -118,16 +110,12 @@ class SearchViewModel(
             val position = (recyclerView.layoutManager as LinearLayoutManager)
                 .findLastCompletelyVisibleItemPosition()
 
-            if (newState == SCROLL_STATE_IDLE && position > -1) {
+            if (newState == SCROLL_STATE_DRAGGING) isFocus.postValue(false)
 
-                isFocus.postValue(false)
-
-                if (isUpdateList.value != true && position == repositoriesList.lastIndex) {
-                    safeLet(edtSearch.value, currentPage.value) { word, page ->
-                        searchRepositories(keyword = word, page = page + 1, restState = false)
-                        isUpdateList.postValue(true)
-                        currentPage.postValue(page + 1)
-                    }
+            if (newState == SCROLL_STATE_IDLE && position > -1 && position == repositoriesList.lastIndex) {
+                safeLet(edtSearch.value, currentPage.value) { word, page ->
+                    searchRepositories(keyword = word, page = page + 1, restState = false)
+                    currentPage.postValue(page + 1)
                 }
             }
         }
