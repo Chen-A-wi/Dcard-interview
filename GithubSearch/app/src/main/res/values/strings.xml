@@ -9,6 +9,8 @@
     <string name="lb_api_error_503">Service unavailable</string>
     <string name="lb_api_unknown_error">Unknown error</string>
     <string name="btn_confirm">Confirm</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="alert_check_internet_msg">Please check internet, if check again still doesn\'t have internet will close app.</string>
     <string name="enter_over_warning">Can\'t enter over 256 characters.</string>
     <string name="enter_empty_warning">Can\'t consists solely of whitespace characters.</string>
     <string name="empty" />
