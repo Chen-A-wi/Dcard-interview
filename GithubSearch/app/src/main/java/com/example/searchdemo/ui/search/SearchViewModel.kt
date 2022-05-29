@@ -22,21 +22,19 @@ import com.example.searchdemo.data.repository.SearchRepository
 import com.example.searchdemo.ui.base.BaseViewModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-
 
 class SearchViewModel(
     private val repository: SearchRepository,
-    val scheduler: SchedulerProvider
+    private val scheduler: SchedulerProvider
 ) : BaseViewModel() {
     var repositoriesList = arrayListOf<Item>()
     val notifyEvent by lazy { MutableLiveData<Unit>() }
     val clickLiveEvent by lazy { SingleLiveEvent<Int>() }
     private val currentPage by lazy { MediatorLiveData<Int>().default(1) }
     val edtSearch by lazy { MediatorLiveData<String>().default("") }
+    lateinit var textWatcher: SimplyTextWatcher
     val errorText = MutableLiveData(R.string.empty)
     val isShowError = MutableLiveData<Boolean>()
     val isShowClear = MediatorLiveData<Boolean>()
@@ -49,27 +47,29 @@ class SearchViewModel(
     fun searchRepositories(keyword: String, page: Int, restState: Boolean) {
         isLoading.postValue(true)
         viewModelScope.launch {
-            repository.getRepositories(keyword = keyword, page = page)
+            val response = repository.getRepositories(keyword = keyword, page = page)
                 .flowOn(scheduler.io())
-                .collectLatest { response ->
-                    if (response.isSuccessful) {
-                        val result = response.body()
+                .filter { edtSearch.value == keyword }
+                .lastOrNull()
 
-                        if (restState) {
-                            resetPage()
-                        }
+            if (response != null && response.isSuccessful) {
+                val result = response.body()
 
-                        result?.items?.let { item ->
-                            repositoriesList.addAll(item)
-                        }
-
-                        notifyEvent.postValue(Unit)
-                    } else {
-                        isFocus.postValue(false)
-                        errorEvent.postValue(ErrorMessage(errorCode = response.code()))
-                    }
-                    isLoading.postValue(false)
+                if (restState) {
+                    resetPage()
                 }
+
+                result?.items?.let { item ->
+                    repositoriesList.addAll(item)
+                }
+
+                notifyEvent.postValue(Unit)
+                isLoading.postValue(false)
+            } else if (response != null && response.code() != 200) {
+                isFocus.postValue(false)
+                errorEvent.postValue(ErrorMessage(errorCode = response.code()))
+                isLoading.postValue(false)
+            }
         }
     }
 
@@ -78,19 +78,22 @@ class SearchViewModel(
         currentPage.postValue(1)
     }
 
-    fun EditText.onTextChangedFlow() = callbackFlow {
-        val watcher = object : SimplyTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                s?.let { word ->
-                    isShowClear.postValue(word.isNotEmpty())
-                    setupEditTextError(word)
-                    trySend(word).onFailure { e -> e?.printStackTrace() }
+    fun onEditWatcher() = object : SimplyTextWatcher() {
+        override fun afterTextChanged(s: Editable?) {
+            super.afterTextChanged(s)
+
+            s?.let { word ->
+                isShowClear.postValue(word.isNotEmpty())
+                setupEditTextError(word)
+                if (word.isNotBlank()) {
+                    searchRepositories(
+                        keyword = word.toString(),
+                        page = 1,
+                        restState = true
+                    )
                 }
             }
         }
-
-        addTextChangedListener(watcher)
-        awaitClose { removeTextChangedListener(watcher) }
     }
 
     private fun setupEditTextError(word: Editable) {

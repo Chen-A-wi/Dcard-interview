@@ -38,21 +38,10 @@ class SearchFragment : BaseFragment() {
 
     private fun initView() {
         vm.apply {
+            textWatcher = onEditWatcher()
+
             binding.rcvRepositoriesList.adapter =
                 RepositoriesListAdapter(itemsList = repositoriesList)
-            lifecycleScope.launch {
-                binding.etSearch.onTextChangedFlow()
-                    .flowOn(scheduler.io())
-                    .collectLatest { word ->
-                        if (word.isNotBlank()) {
-                            searchRepositories(
-                                keyword = word.toString(),
-                                page = 1,
-                                restState = true
-                            )
-                        }
-                    }
-            }
 
             binding.rcvRepositoriesList.addOnScrollListener(onScrollListener())
         }
