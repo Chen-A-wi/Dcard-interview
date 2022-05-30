@@ -16,7 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 val viewModelModule = module {
-    viewModel { SearchViewModel(get(), get()) }
+    viewModel { SearchViewModel(get()) }
 }
 
 val networkModule = module {
