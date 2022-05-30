@@ -72,7 +72,6 @@
                             android:paddingEnd="30dp"
                             android:text="@={vm.edtSearch}"
                             android:textSize="16sp"
-                            app:addTextChangedListener="@{vm.textWatcher}"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
