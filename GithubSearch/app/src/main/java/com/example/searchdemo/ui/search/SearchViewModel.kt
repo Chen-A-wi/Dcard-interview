@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.EditText
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING
@@ -19,15 +18,15 @@ import com.example.searchdemo.common.utils.SimplyTextWatcher
 import com.example.searchdemo.common.utils.SingleLiveEvent
 import com.example.searchdemo.data.ErrorMessage
 import com.example.searchdemo.data.Item
+import com.example.searchdemo.data.Repositories
 import com.example.searchdemo.data.repository.SearchRepository
 import com.example.searchdemo.ui.base.BaseViewModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SearchViewModel(
     private val repository: SearchRepository,
@@ -49,16 +48,12 @@ class SearchViewModel(
 
     fun searchRepositories(keyword: String, page: Int, restState: Boolean) {
         isLoading.postValue(true)
-        viewModelScope.launch {
-            repository.getRepositories(keyword = keyword, page = page)
-                .flowOn(scheduler.io())
-                .catch { e ->
-                    isFocus.postValue(false)
-                    errorEvent.postValue(ErrorMessage())
-                    isLoading.postValue(false)
-                    Log.e("[API Error]", "$e")
-                }
-                .collectLatest { response ->
+        repository.getRepositories(keyword = keyword, page = page)
+            .enqueue(object : Callback<Repositories> {
+                override fun onResponse(
+                    call: Call<Repositories>,
+                    response: Response<Repositories>
+                ) {
                     if (response.isSuccessful) {
                         if (restState) {
                             resetPage()
@@ -66,9 +61,9 @@ class SearchViewModel(
 
                         response.body()?.items?.let { item ->
                             repositoriesList.addAll(item)
+                            notifyEvent.postValue(Unit)
                         }
 
-                        notifyEvent.postValue(Unit)
                         isLoading.postValue(false)
                     } else {
                         isFocus.postValue(false)
@@ -76,7 +71,14 @@ class SearchViewModel(
                         isLoading.postValue(false)
                     }
                 }
-        }
+
+                override fun onFailure(call: Call<Repositories>, t: Throwable) {
+                    isFocus.postValue(false)
+                    errorEvent.postValue(ErrorMessage())
+                    isLoading.postValue(false)
+                    Log.e("[API Error]", "${call.execute().errorBody()}")
+                }
+            })
     }
 
     fun resetPage() {
