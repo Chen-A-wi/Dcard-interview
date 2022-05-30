@@ -5,7 +5,7 @@ import com.example.searchdemo.api.SearchServices
 import com.example.searchdemo.common.utils.AppSchedulerProvider
 import com.example.searchdemo.common.utils.LoggerInterceptor
 import com.example.searchdemo.common.utils.SchedulerProvider
-import com.example.searchdemo.data.repository.SearchRepository
+import com.example.searchdemo.repository.SearchRepository
 import com.example.searchdemo.ui.search.SearchViewModel
 import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
