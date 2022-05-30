@@ -4,17 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.lifecycleScope
+import androidx.core.widget.doAfterTextChanged
 import com.afollestad.materialdialogs.MaterialDialog
 import com.example.searchdemo.R
-import com.example.searchdemo.common.ext.debounce
 import com.example.searchdemo.common.ext.hideKeyboard
 import com.example.searchdemo.databinding.FragmentSearchBinding
 import com.example.searchdemo.ui.base.BaseFragment
 import com.example.searchdemo.ui.search.repositorieslist.RepositoriesListAdapter
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlin.system.exitProcess
 
@@ -51,21 +47,8 @@ class SearchFragment : BaseFragment() {
 
     private fun initView() {
         vm.apply {
-            lifecycleScope.launch {
-                binding.etSearch.onTextChangeFlow()
-                    .flowOn(scheduler.io())
-                    .debounce(500)
-                    .collectLatest { word ->
-                        if (word.isNotBlank()) {
-                            searchRepositories(
-                                keyword = word.toString(),
-                                page = 1,
-                                restState = true
-                            )
-                        } else {
-                            resetPage()
-                        }
-                    }
+            binding.etSearch.doAfterTextChanged { keyword ->
+                keywordStateFlow.value = keyword.toString()
             }
 
             binding.rcvRepositoriesList.adapter =

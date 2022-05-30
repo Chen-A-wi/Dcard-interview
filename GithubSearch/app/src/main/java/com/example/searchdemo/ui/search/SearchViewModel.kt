@@ -1,36 +1,32 @@
 package com.example.searchdemo.ui.search
 
-import android.text.Editable
 import android.util.Log
 import android.view.View
-import android.widget.EditText
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import com.example.searchdemo.R
+import com.example.searchdemo.common.ext.debounce
 import com.example.searchdemo.common.ext.default
 import com.example.searchdemo.common.ext.safeLet
-import com.example.searchdemo.common.utils.SchedulerProvider
-import com.example.searchdemo.common.utils.SimplyTextWatcher
 import com.example.searchdemo.common.utils.SingleLiveEvent
 import com.example.searchdemo.data.ErrorMessage
 import com.example.searchdemo.data.Item
 import com.example.searchdemo.data.Repositories
 import com.example.searchdemo.repository.SearchRepository
 import com.example.searchdemo.ui.base.BaseViewModel
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.onFailure
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class SearchViewModel(
     private val repository: SearchRepository,
-    val scheduler: SchedulerProvider
 ) : BaseViewModel() {
     var repositoriesList = arrayListOf<Item>()
     val notifyEvent by lazy { MutableLiveData<Unit>() }
@@ -41,6 +37,24 @@ class SearchViewModel(
     val isShowError = MutableLiveData<Boolean>()
     val isShowClear = MediatorLiveData<Boolean>()
     val isFocus = MutableLiveData(false)
+    val keywordStateFlow = MutableStateFlow("")
+
+    init {
+        viewModelScope.launch {
+            keywordStateFlow
+                .debounce(500)
+                .collect { word ->
+                    isShowClear.postValue(word.isNotEmpty())
+                    setupEditTextError(word)
+                    if (word.isNotBlank()) {
+                        searchRepositories(keyword = word, page = 1, restState = true)
+                    } else {
+                        resetPage()
+                    }
+
+                }
+        }
+    }
 
     fun onClick(v: View) {
         clickLiveEvent.postValue(v.id)
@@ -87,24 +101,7 @@ class SearchViewModel(
         notifyEvent.postValue(Unit)
     }
 
-    fun EditText.onTextChangeFlow() = callbackFlow {
-        val watcher = object : SimplyTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                super.afterTextChanged(s)
-                s?.let { word ->
-                    isShowClear.postValue(word.isNotEmpty())
-                    setupEditTextError(word)
-                    trySend(word).onFailure { e -> e?.printStackTrace() }
-                }
-            }
-        }
-
-        addTextChangedListener(watcher)
-        awaitClose { removeTextChangedListener(watcher) }
-    }
-
-
-    private fun setupEditTextError(word: Editable) {
+    private fun setupEditTextError(word: String) {
         if (word.isNotEmpty() && word.isBlank()) {
             isShowError.postValue(word.isBlank())
             errorText.postValue(R.string.enter_empty_warning)
