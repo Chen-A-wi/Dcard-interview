@@ -19,7 +19,7 @@ import com.example.searchdemo.common.utils.SingleLiveEvent
 import com.example.searchdemo.data.ErrorMessage
 import com.example.searchdemo.data.Item
 import com.example.searchdemo.data.Repositories
-import com.example.searchdemo.data.repository.SearchRepository
+import com.example.searchdemo.repository.SearchRepository
 import com.example.searchdemo.ui.base.BaseViewModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure

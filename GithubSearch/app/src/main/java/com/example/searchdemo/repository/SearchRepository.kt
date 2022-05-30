@@ -1,4 +1,4 @@
-package com.example.searchdemo.data.repository
+package com.example.searchdemo.repository
 
 import com.example.searchdemo.api.SearchServices
 import com.example.searchdemo.data.Repositories
