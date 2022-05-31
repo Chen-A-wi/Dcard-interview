@@ -10,6 +10,10 @@
 | ------------- | ------------- |
 | <img src= "https://user-images.githubusercontent.com/24693300/171027764-a2eb623d-8738-410d-b18e-659943ee7051.png" width="360" height="720" /> | <img src= "https://user-images.githubusercontent.com/24693300/171028860-e2b7a5de-3d59-4d24-9fed-207c54c64af9.png" width="360" height="720" />  |
 
+| Search enter space |
+| ------------- |
+| <img src= "https://user-images.githubusercontent.com/24693300/171076492-2a6c0567-7852-4c15-92b8-b54a668608de.png" width="360" height="720" /> | 
+
 ## Feature
 - [x] 程式碼使用 Kotlin 撰寫。
 - [x] 文字輸入匡。
