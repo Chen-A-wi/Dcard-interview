@@ -35,6 +35,6 @@
   - Lifecycle
   - ViewModel
   - DataBinding
-- 使用Coroutines處理搜尋框
+- 使用Coroutines & Flow處理搜尋框
 - 使用Airbnb Lottie處理Loading動畫
 - 使用Gson解析Json
