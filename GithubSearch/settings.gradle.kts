@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "SearchDemo"
-include ':app'
+include(":app")
